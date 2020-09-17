@@ -1,0 +1,58 @@
+- 
+   name: Playbook 
+   hosts: localhost
+   tasks: 
+     - name: Run the mysql container
+       docker_container:
+              name: database
+              image: mysql
+              state: started
+              exposed_ports:
+                   - 3306
+              published_ports:
+                   - 3306:3306
+              volumes:
+                   - /var/lib/mysql:/var/lib/mysql  
+                   #- /etc/mysql:/etc/mysql/conf.d
+              env:
+                MYSQL_DATABASE: shopon
+                MYSQL_ROOT_PASSWORD: root
+                MYSQL_ROOT_HOST: '%'
+              
+              #lower-case-table-names: 1
+             
+     - name: Create a new database with name 'shopon'
+       mysql_db:
+            #login_unix_socket: /var/lib/mysql/mysql.sock
+            name: shopon
+            state: present
+            target: ./sm-shop/ShopOn.sql
+            #login_host: localhost
+            login_user: root
+            login_password: root
+            
+     - name: Create database user with name 'shopon' and password 'shoponpwd' with all database privileges
+       mysql_user:
+         name: shopon
+         host: '%'
+         password: shoponpwd
+         priv: '*.*:ALL'
+         state: present
+         login_user: root
+         login_password: root
+         #login_host: '0.0.0.0'
+         #login_host: '%'
+    
+    
+     - name: Deploy on the test server
+       docker_container:
+             name: shopon
+             image: madhurk/shopon
+             pull: true
+             links:
+                - database:database
+             published_ports:
+                - 8085:8080
+
+     
+      

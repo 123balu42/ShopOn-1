@@ -1,0 +1,86 @@
+pipeline{
+    agent any
+    tools{
+       maven 'maven'
+    }
+    environment {
+    registry = "madhurk/shopon"
+    registryCredential = 'madhurk'
+    dockerImage = ''
+  }
+    stages{       
+        
+            stage('Modify the database properties') {
+            steps {
+                echo 'Modify the properties file ...'
+                 ansiblePlaybook(
+                        inventory: 'inventory.txt',
+                        playbook: 'ansible-playbook-sql.yml',
+                        disableHostKeyChecking: true,
+                        colorized: true
+                  )
+    }
+    }
+    
+     stage ('Build') {
+      steps{
+        echo "Building Project"
+        sh 'mvn clean package -DskipTests'
+      }
+    }
+    
+    
+     stage ('Archive') {
+      steps{
+        echo "Archiving Project"
+        archiveArtifacts artifacts: '**/*.war', followSymlinks: false
+      }
+    }
+    
+    
+     stage ('Build Docker Image') {
+      steps{
+        echo "Building Docker Image"
+        script {
+          dockerImage = docker.build("${registry}", "-f ./sm-shop/Dockerfile .") 
+          
+        }
+      }
+     }
+        
+     
+    stage ('Push Docker Image') {
+      steps{
+        echo "Pushing Docker Image"
+        script {
+          docker.withRegistry( '', registryCredential ) {
+              dockerImage.push()
+          }
+        }
+      }
+    }
+    
+  
+    
+    
+    
+    
+    
+     stage('Deploy') {
+            steps {
+                echo 'Deploying the application ...'
+                 ansiblePlaybook(
+                        inventory: 'inventory.txt',
+                        playbook: 'ansible-playbook.yml',
+                        disableHostKeyChecking: true,
+                        colorized: true
+                  )
+    }
+    }
+    
+      
+        }
+    }
+
+
+    

@@ -1,0 +1,5 @@
+[test]
+ansible_host=localhost ansible_user=centos 
+
+[prod]
+ansible_host=172.31.0.121 ansible_user=centos ansible_python_interpreter=/usr/bin/python3
