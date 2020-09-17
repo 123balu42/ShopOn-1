@@ -1,7 +1,7 @@
 pipeline {
   environment {
-    registry = "prabhavagrawal/shopon"
-    registryCredential = 'docker_hub_prabhavagrawal'
+    registry = "namishjain253/shopon"
+    registryCredential = 'docker_hub_namishjain'
     dockerImage = ''
   }
   agent any
@@ -41,7 +41,7 @@ pipeline {
       steps{
         echo "Deploying to Dev Environment"
         sh "docker rm -f shopon || true"
-        sh "docker run -d --name=shopon -p 8080:8080 prabhavagrawal/shopon"
+        sh "docker run -d --name=shopon -p 8080:8080 namishjain253/shopon"
       }
     }
   }
