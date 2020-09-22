@@ -44,8 +44,8 @@ pipeline {
     stage ('Deploy to Dev') {
       steps{
         echo "Deploying to Dev Environment"
-        bat ''' docker rm -f shopon || true '''
-        bat ''' docker run -d --name=shopon -p 8080:8080 namishjain253/shopon '''
+        bat ''' docker rm -f shopon || true 
+                docker run -d --name=shopon -p 8090:8090 namishjain253/shopon '''
       }
     }
   }
